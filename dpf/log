@@ -1,0 +1,63 @@
+root0 = 73a4d1594c8669274b87bfc7
+root1 = 8a3fdb82350954655f112e
+t0 = 1
+t1 = 0
+
+ ------------ 
+bit = 1
+P0: left child: dbc2606449ed5f70
+P0: right child: 6e7ac48c5368785
+
+P1: left child: 163b988cf92bce5d
+P1: right child: 6eec9bec7f855a7b
+P0 L advice bit = 0
+P0 R advice bit = 0
+P1 L advice bit = 1
+P1 R advice bit = 1
+cw = cdf9f8e8b0c6912d
+1, 0
+after the correction words are applied: 
+SL = a3833c64b5f016a8
+SR = 6eec9bec7f855a7b
+tL = 0
+tR = 1
+
+ ------------ 
+bit = 0
+P0: left child: ccf96014e1d82591
+P0: right child: 5ada804462685a5f
+
+P1: left child: 266914a8a3510fcb
+P1: right child: 7993468076856e44
+P0 L advice bit = 1
+P0 R advice bit = 0
+P1 L advice bit = 0
+P1 R advice bit = 1
+cw = 2349c6c414ed341b
+0, 1
+after the correction words are applied: 
+SL = ccf96014e1d82591
+SR = 520d26cb7bc3bd0
+tL = 1
+tR = 0
+
+ ------------ 
+bit = 1
+P0: left child: 4db0be84c1d0b31a
+P0: right child: 298c064ce79c003c
+
+P1: left child: 3e6bf0d84eb5dfc9
+P1: right child: 874fd0809e9398cb
+P0 L advice bit = 1
+P0 R advice bit = 0
+P1 L advice bit = 0
+P1 R advice bit = 0
+cw = 73db4e5c8f656cd3
+1, 1
+after the correction words are applied: 
+SL = 5a57481068f96cef
+SR = 874fd0809e9398cb
+tL = 1
+tR = 0
+default+make+finalizer
+---> 1f4 64

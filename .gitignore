@@ -1,0 +1,11 @@
+build/
+*.o
+*.a
+*.so
+*.out
+*.log
+*.tmp
+*.swp
+.idea/
+.vscode/
+*.rand
