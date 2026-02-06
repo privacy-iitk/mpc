@@ -42,11 +42,13 @@ struct MPCContext {
     std::ofstream mul_out_p1;
     std::ifstream mul_in_p0;
     std::ifstream mul_in_p1;
-        std::ofstream and_out_p0;
+
+    std::ofstream and_out_p0;
     std::ofstream and_out_p1;
     std::ifstream and_in_p0;
     std::ifstream and_in_p1;
-    uint64_t       mul_ctr, and_ctr;
+    
+    uint64_t mul_ctr, and_ctr;
 
     MPCContext(Role r,
                NetPeer& s,
@@ -59,60 +61,40 @@ struct MPCContext {
 template<typename T>
 struct XShare {
     static_assert(std::is_integral_v<T>, "XShare requires integral type");
+    
     T val{};
+    
     MPCContext* ctx = nullptr;
+    
     XShare(T v, MPCContext* c = nullptr) : val(v), ctx(c) {}
+    
     inline XShare operator^(const XShare& o) const { return XShare(static_cast<T>(val ^ o.val), ctx); }
     inline XShare& operator^=(const XShare& o) { val ^= o.val; return *this; }
     inline XShare operator+(const XShare& o) const { return *this ^ o; }
     inline XShare operator-(const XShare& o) const { return *this ^ o; }
-     friend std::ostream& operator<<(std::ostream& os, const XShare& s) { os << s.val; return os; }
+    
+    friend std::ostream& operator<<(std::ostream& os, const XShare& s) { os << s.val; return os; }
 };
 
 // Additive share
 template<typename T>
 struct AShare {
+    
     static_assert(std::is_integral_v<T>, "AShare requires integral type");
+    
     T val{};
+    
     MPCContext* ctx = nullptr;
+    
     AShare(T v, MPCContext* c = nullptr) : val(v), ctx(c) {}
-    //explicit AShare(T v, MPCContext* c = nullptr) : val(v), ctx(c) {}
+ 
     inline AShare operator+(const AShare& o) const { return AShare(static_cast<T>(val + o.val), ctx); }
     inline AShare operator-(const AShare& o) const { return AShare(static_cast<T>(val - o.val), ctx); }
     inline AShare& operator+=(const AShare& o) { val = static_cast<T>(val + o.val); return *this; }
+    
     friend std::ostream& operator<<(std::ostream& os, const AShare& s) { os << s.val; return os; }
 };
 
-
-// XOR share
-// template<typename T>
-// struct XShare {
-//     static_assert(std::is_integral_v<T>, "XShare requires integral type");
-//     T val{};
-//     MPCContext* ctx = nullptr;
-//     XShare() = default;
-//     explicit XShare(T v, MPCContext* c = nullptr) : val(v), ctx(c) {}
-//     inline XShare operator^(const XShare& o) const { return XShare(static_cast<T>(val ^ o.val), ctx); }
-//     inline XShare& operator^=(const XShare& o) { val ^= o.val; return *this; }
-//     inline XShare operator+(const XShare& o) const { return *this ^ o; }
-//     inline XShare operator-(const XShare& o) const { return *this ^ o; }
-//     inline XShare operator*(const XShare& o) const { return XShare(static_cast<T>(val & o.val), ctx); }
-//     friend std::ostream& operator<<(std::ostream& os, const XShare& s) { os << s.val; return os; }
-// };
-
-// // Additive share
-// template<typename T>
-// struct AShare {
-//     static_assert(std::is_integral_v<T>, "AShare requires integral type");
-//     T val{};
-//     MPCContext* ctx = nullptr;
-//     AShare() = default;
-//     explicit AShare(T v, MPCContext* c = nullptr) : val(v), ctx(c) {}
-//     inline AShare operator+(const AShare& o) const { return AShare(static_cast<T>(val + o.val), ctx); }
-//     inline AShare operator-(const AShare& o) const { return AShare(static_cast<T>(val - o.val), ctx); }
-//     inline AShare& operator+=(const AShare& o) { val = static_cast<T>(val + o.val); return *this; }
-//     friend std::ostream& operator<<(std::ostream& os, const AShare& s) { os << s.val; return os; }
-// };
 
 // vector XOR shares
 template<typename T>
@@ -132,64 +114,7 @@ struct XorShareVector {
     }
 };
 
-// template<typename T>
-// struct AdditiveShareVector {
-//     static_assert(std::is_integral_v<T>, "AdditiveShareVector requires integral type");
-
-//     std::vector<T> vals;
-
-//     AdditiveShareVector() = default;
-//     //explicit AdditiveShareVector(std::vector<T> v) : vals(std::move(v)) {}
-
-//     // Element-wise addition of additive shares
-//     inline AdditiveShareVector operator+(const AdditiveShareVector& o) const {
-//         if (vals.size() != o.vals.size())
-//             throw std::runtime_error("AdditiveShareVector size mismatch");
-//         std::vector<T> out(vals.size());
-//         for (size_t i = 0; i < vals.size(); ++i)
-//             out[i] = static_cast<T>(vals[i] + o.vals[i]);
-//         return AdditiveShareVector(std::move(out));
-//     }
-
-//     // Element-wise subtraction
-//     inline AdditiveShareVector operator-(const AdditiveShareVector& o) const {
-//         if (vals.size() != o.vals.size())
-//             throw std::runtime_error("AdditiveShareVector size mismatch");
-//         std::vector<T> out(vals.size());
-//         for (size_t i = 0; i < vals.size(); ++i)
-//             out[i] = static_cast<T>(vals[i] - o.vals[i]);
-//         return AdditiveShareVector(std::move(out));
-//     }
-
-//     // In-place addition
-//     inline AdditiveShareVector& operator+=(const AdditiveShareVector& o) {
-//         if (vals.size() != o.vals.size())
-//             throw std::runtime_error("AdditiveShareVector size mismatch");
-//         for (size_t i = 0; i < vals.size(); ++i)
-//             vals[i] = static_cast<T>(vals[i] + o.vals[i]);
-//         return *this;
-//     }
-
-//     // In-place subtraction
-//     inline AdditiveShareVector& operator-=(const AdditiveShareVector& o) {
-//         if (vals.size() != o.vals.size())
-//             throw std::runtime_error("AdditiveShareVector size mismatch");
-//         for (size_t i = 0; i < vals.size(); ++i)
-//             vals[i] = static_cast<T>(vals[i] - o.vals[i]);
-//         return *this;
-//     }
-
-//     // Print nicely
-//     friend std::ostream& operator<<(std::ostream& os, const AdditiveShareVector& s) {
-//         os << "[";
-//         for (size_t i = 0; i < s.vals.size(); ++i) {
-//             os << s.vals[i];
-//             if (i + 1 < s.vals.size()) os << ", ";
-//         }
-//         os << "]";
-//         return os;
-//     }
-// };
+ 
 template<typename T>
 struct AdditiveShareVector {
     static_assert(std::is_integral_v<T>, "AdditiveShareVector requires integral type");

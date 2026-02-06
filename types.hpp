@@ -487,7 +487,8 @@ static inline T operator&(const std::vector<T>& a,
     for (size_t i = 0; i < a.size(); ++i) {
         // Optional but strongly recommended sanity checks (remove in production)
         // assert(a[i] & one == a[i] when b[i] == one);
-        std::cout << a[i] << " & " << b[i] << " = " << (a[i] * b[i]) << std::endl;
+       // std::cout << a[i] << " & " << b[i] << " = " << (a[i] & b[i]) << std::endl;
+       // acc ^= (a[i] * b[i]);
         acc ^= (a[i] * b[i]);
     }
     return acc;
@@ -505,6 +506,25 @@ static inline mX operator*(const std::vector<mX>& a, const std::vector<Scalar>& 
         acc = acc + (a[i] * static_cast<uint8_t>(b[i]));
     return acc;
 }
+
+#include <immintrin.h>
+#include <ostream>
+#include <iomanip>
+
+inline std::ostream& operator<<(std::ostream& os, const __m128i& v)
+{
+    alignas(16) uint8_t bytes[16];
+    _mm_storeu_si128(reinterpret_cast<__m128i*>(bytes), v);
+
+    os << "0x";
+    for (int i = 15; i >= 0; --i) {  // big-endian display
+        os << std::hex << std::setw(2) << std::setfill('0')
+           << static_cast<int>(bytes[i]);
+    }
+    os << std::dec;
+    return os;
+}
+
 
 // Symmetric version: vector<Scalar> ⋅ vector<mX>
 template<typename Scalar, typename = std::enable_if_t<std::is_arithmetic_v<Scalar>>>

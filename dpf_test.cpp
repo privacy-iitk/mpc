@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
               << " ms\n";
 
     auto start_eval = std::chrono::high_resolution_clock::now();
-    __evalinterval(dpfkey0, 0, nitems - 1, output0, _t0);
+    __evalinterval_mpc(dpfkey0, 0, nitems - 1, output0, _t0);
     auto end_eval = std::chrono::high_resolution_clock::now();
 
     std::cout << "Evalfull time = "
@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
 
     std::cout << "\n\n ----------------------------------------------------------- \n\n";
 
-    __evalinterval(dpfkey1, 0, nitems - 1, output1, _t1);
+    __evalinterval_mpc(dpfkey1, 0, nitems - 1, output1, _t1);
 
     for (size_t j = 0; j < nitems; ++j) {
         if (!leaf_equal(output0[j], output1[j])) {

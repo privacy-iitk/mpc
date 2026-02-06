@@ -8,7 +8,7 @@
 
 
 #include <boost/asio.hpp>
-#include <boost/asio/experimental/awaitable_operators.hpp>
+//#include <boost/asio/experimental/awaitable_operators.hpp>
 #include <iostream>
 #include <random>
 #include <stdexcept>
@@ -16,7 +16,7 @@
 #include "prg.hpp"
 using boost::asio::awaitable;
 using boost::asio::use_awaitable;
-using namespace boost::asio::experimental::awaitable_operators;
+//using namespace boost::asio::experimental::awaitable_operators;
 
 
 #include "shares.hpp"
@@ -56,7 +56,7 @@ inline boost::asio::awaitable<T> mpc_dotproduct(
         NetPeer& p1 = *second_peer;
 
         AES_KEY key;
-        std::cout << " ----->>> " << x.vals.size() << std::endl;
+      //  std::cout << " ----->>> " << x.vals.size() << std::endl;
 
         std::vector<T> X0(x.vals.size()), X1(x.vals.size());
         std::vector<T> Y0(y.vals.size()), Y1(y.vals.size());
@@ -77,10 +77,19 @@ inline boost::asio::awaitable<T> mpc_dotproduct(
 
         std::cout << "finished dotproduct" << std::endl;
 
-        co_await (
-            (p0 << seed_X0) && (p0 << seed_Y0) && (p0 << gamma0) &&
-            (p1 << seed_X1) && (p1 << seed_Y1) && (p1 << gamma1)
-        );
+        // co_await (
+        //     (p0 << seed_X0) && (p0 << seed_Y0) && (p0 << gamma0) &&
+        //     (p1 << seed_X1) && (p1 << seed_Y1) && (p1 << gamma1)
+        // );
+
+        co_await (p0 << seed_X0);
+        co_await (p0 << seed_Y0);
+        co_await (p0 << gamma0);
+
+        co_await (p1 << seed_X1);
+        co_await (p1 << seed_Y1);
+        co_await (p1 << gamma1);
+
     }
 
     // -------------------------------------------------------------------------
@@ -93,7 +102,11 @@ inline boost::asio::awaitable<T> mpc_dotproduct(
 
         __m128i seed_X0, seed_Y0;
         T gamma0;
-        co_await ((self >> seed_X0) && (self >> seed_Y0) && (self >> gamma0));
+        //co_await ((self >> seed_X0) && (self >> seed_Y0) && (self >> gamma0));
+        co_await (self >> seed_X0);
+        co_await (self >> seed_Y0);
+        co_await (self >> gamma0);
+
 
         std::vector<T> X_tilde(x.vals.size()), Y_tilde(x.vals.size());
         std::vector<T> X_blind(x.vals.size()), Y_blind(x.vals.size());
@@ -101,17 +114,21 @@ inline boost::asio::awaitable<T> mpc_dotproduct(
         crypto::fill_vector_with_prg(X_blind, key, seed_X0);
         crypto::fill_vector_with_prg(Y_blind, key, seed_Y0);
 
-        co_await (
-            (peer << (x.vals + X_blind)) &&
-            (peer << (y.vals + Y_blind)) &&
-            (peer >> X_tilde) &&
-            (peer >> Y_tilde)
-        );
+        // co_await (
+        //     (peer << (x.vals + X_blind)) &&
+        //     (peer << (y.vals + Y_blind)) &&
+        //     (peer >> X_tilde) &&
+        //     (peer >> Y_tilde)
+        // );
 
+
+            co_await (peer << (x.vals + X_blind));
+            co_await (peer << (y.vals + Y_blind));
+            co_await (peer >> X_tilde);
+            co_await (peer >> Y_tilde);
         T z0 =  x.vals * (y.vals + Y_tilde) - (Y_blind * X_tilde) + gamma0;
         out = z0;
     }
-
     // -------------------------------------------------------------------------
     // P1: Receives seeds and computes blinded vectors
     // -------------------------------------------------------------------------
@@ -122,7 +139,11 @@ inline boost::asio::awaitable<T> mpc_dotproduct(
 
         __m128i seed_X1, seed_Y1;
         T gamma1;
-        co_await ((self >> seed_X1) && (self >> seed_Y1) && (self >> gamma1));
+        
+        //co_await ((self >> seed_X1) && (self >> seed_Y1) && (self >> gamma1));
+        co_await (self >> seed_X1);
+         co_await (self >> seed_Y1);
+          co_await (self >> gamma1);
 
         std::vector<T> X_tilde(x.vals.size()), Y_tilde(x.vals.size());
         std::vector<T> X_blind(x.vals.size()), Y_blind(x.vals.size());
@@ -130,12 +151,19 @@ inline boost::asio::awaitable<T> mpc_dotproduct(
         crypto::fill_vector_with_prg(X_blind, key, seed_X1);
         crypto::fill_vector_with_prg(Y_blind, key, seed_Y1);
 
-        co_await (
-            (peer << (x.vals + X_blind)) &&
-            (peer << (y.vals + Y_blind)) &&
-            (peer >> X_tilde) &&
-            (peer >> Y_tilde)
-        );
+        // co_await (
+        //     (peer << (x.vals + X_blind)) &&
+        //     (peer << (y.vals + Y_blind)) &&
+        //     (peer >> X_tilde) &&
+        //     (peer >> Y_tilde)
+        // );
+
+  
+        co_await (peer << (x.vals + X_blind));
+        co_await (peer << (y.vals + Y_blind));
+        co_await (peer >> X_tilde); 
+        co_await (peer >> Y_tilde);
+
 
         T z1 = x.vals * (y.vals + Y_tilde) - (Y_blind * X_tilde) + gamma1;
  
@@ -200,11 +228,19 @@ inline boost::asio::awaitable<T> mpc_mul(
         if (x.ctx->rand_mode == RandomnessMode::Online) {
        
         // Send concurrently
-            co_await (
-                (p0 << X0) && (p1 << Y0) &&
-                (p0 << X1) && (p1 << Y1) &&
-                (p0 << gamma0) && (p1 << gamma1)
-            );
+            // co_await (
+            //     (p0 << X0) && (p1 << Y0) &&
+            //     (p0 << X1) && (p1 << Y1) &&
+            //     (p0 << gamma0) && (p1 << gamma1)
+            // );
+        co_await (p0 << X0);
+        co_await (p1 << Y0);
+
+        co_await (p0 << X1);
+        co_await (p1 << Y1);
+
+        co_await (p0 << gamma0);
+        co_await (p1 << gamma1);
 
          std::cout << std::endl << "RandomnessMode::Online" << std::endl << std::endl;
        
@@ -255,7 +291,11 @@ inline boost::asio::awaitable<T> mpc_mul(
         // Read preprocessing material
         // --------------------------------
         if (x.ctx->rand_mode == RandomnessMode::Online) {
-            co_await ((self >> X) && (self >> Y) && (self >> gamma));
+            //co_await ((self >> X) && (self >> Y) && (self >> gamma));
+
+            co_await (self >> X); 
+            co_await (self >> Y);
+            co_await  (self >> gamma);
         }
         else if (x.ctx->rand_mode == RandomnessMode::Replay) {
 
@@ -295,21 +335,34 @@ inline boost::asio::awaitable<T> mpc_mul(
         // --------------------------------
         // Exchange masked values
         // --------------------------------
+        // if (is_p0) {
+        //     co_await (
+        //         (peer << (x_i + X)) &&
+        //         (peer << (y_i + Y)) &&
+        //         (peer >> X_tilde) &&
+        //         (peer >> Y_tilde)
+        //     );
+        // } else {
+        //     co_await (
+        //         (peer >> X_tilde) &&
+        //         (peer >> Y_tilde) &&
+        //         (peer << (x_i + X)) &&
+        //         (peer << (y_i + Y))
+        //     );
+        // }
+
         if (is_p0) {
-            co_await (
-                (peer << (x_i + X)) &&
-                (peer << (y_i + Y)) &&
-                (peer >> X_tilde) &&
-                (peer >> Y_tilde)
-            );
-        } else {
-            co_await (
-                (peer >> X_tilde) &&
-                (peer >> Y_tilde) &&
-                (peer << (x_i + X)) &&
-                (peer << (y_i + Y))
-            );
-        }
+    co_await (peer << (x_i + X));
+    co_await (peer << (y_i + Y));
+    co_await (peer >> X_tilde);
+    co_await (peer >> Y_tilde);
+} else {
+    co_await (peer >> X_tilde);
+    co_await (peer >> Y_tilde);
+    co_await (peer << (x_i + X));
+    co_await (peer << (y_i + Y));
+}
+
 
         // --------------------------------
         // Beaver reconstruction
@@ -463,10 +516,19 @@ inline boost::asio::awaitable<T> mpc_and(
         }
 
         if (x.ctx->rand_mode == RandomnessMode::Online) {
-            co_await (
-                (p0 << X0) && (p0 << Y0) && (p0 << gamma0) &&
-                (p1 << X1) && (p1 << Y1) && (p1 << gamma1)
-            );
+            // co_await (
+            //     (p0 << X0) && (p0 << Y0) && (p0 << gamma0) &&
+            //     (p1 << X1) && (p1 << Y1) && (p1 << gamma1)
+            // );
+
+            co_await (p0 << X0);
+            co_await (p0 << Y0);
+            co_await (p0 << gamma0);
+
+            co_await (p1 << X1);
+            co_await (p1 << Y1);
+            co_await (p1 << gamma1);
+
         }
         else if (x.ctx->rand_mode == RandomnessMode::Record) {
             uint64_t idx = x.ctx->and_ctr++;
@@ -502,7 +564,14 @@ inline boost::asio::awaitable<T> mpc_and(
         // Receive / replay preprocessing
         // -------------------------------
         if (x.ctx->rand_mode == RandomnessMode::Online) {
-            co_await ((self >> X) && (self >> Y) && (self >> gamma));
+            
+           // co_await ((self >> X) && (self >> Y) && (self >> gamma));
+
+            co_await (self >> X);
+            co_await (self >> Y);
+            co_await (self >> gamma);
+
+
         }
         else if (x.ctx->rand_mode == RandomnessMode::Replay) {
 
@@ -542,20 +611,31 @@ inline boost::asio::awaitable<T> mpc_and(
         // -------------------------------
         // Exchange masked values
         // -------------------------------
+        // if (is_p0) {
+        //     co_await (
+        //         (peer << ai) &&
+        //         (peer << bi) &&
+        //         (peer >> aj) &&
+        //         (peer >> bj)
+        //     );
+        // } else {
+        //     co_await (
+        //         (peer >> aj) &&
+        //         (peer >> bj) &&
+        //         (peer << ai) &&
+        //         (peer << bi)
+        //     );
+        // }
         if (is_p0) {
-            co_await (
-                (peer << ai) &&
-                (peer << bi) &&
-                (peer >> aj) &&
-                (peer >> bj)
-            );
+            co_await (peer << ai);
+            co_await (peer << bi);
+            co_await (peer >> aj);
+            co_await (peer >> bj);
         } else {
-            co_await (
-                (peer >> aj) &&
-                (peer >> bj) &&
-                (peer << ai) &&
-                (peer << bi)
-            );
+            co_await (peer >> aj);
+            co_await (peer >> bj);
+            co_await (peer << ai);
+            co_await (peer << bi);
         }
 
         // -------------------------------
@@ -666,10 +746,15 @@ operator|(const XShare<T>& x, const XShare<T>& y) {
         r1XS = r ^ r0XS;
 
         // Send masks
-        co_await (
-            (p0 << r0AS) && (p1 << r1AS) &&
-            (p0 << r0XS) && (p1 << r1XS)
-        );
+        // co_await (
+        //     (p0 << r0AS) && (p1 << r1AS) &&
+        //     (p0 << r0XS) && (p1 << r1XS)
+        // );
+        co_await (p0 << r0AS);
+        co_await (p1 << r1AS);
+
+        co_await (p0 << r0XS);
+        co_await (p1 << r1XS);
 
         // --------------------------------------------------
         // Dummy OR-reduction to match P0/P1 control flow
@@ -714,13 +799,18 @@ operator|(const XShare<T>& x, const XShare<T>& y) {
         NetPeer& peer = *peer_ptr;
 
         uint64_t rAS, rXS;
-        co_await ((self >> rAS) && (self >> rXS));
-
+        //co_await ((self >> rAS) && (self >> rXS));
+        co_await (self >> rAS);
+        co_await (self >> rXS);
+        
         uint64_t c = x.val + rAS;
 
         uint64_t c_recv;
-        co_await ((peer << c) && (peer >> c_recv));
+        //co_await ((peer << c) && (peer >> c_recv));
 
+        co_await (peer << c);
+        co_await (peer >> c_recv);
+        
         uint64_t c_rec = c + c_recv;
 
         uint64_t tmps[64];
